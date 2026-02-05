@@ -1,0 +1,65 @@
+# Virtual environments
+venv/
+research/
+env/
+ENV/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Test/Example files
+websocket_request_example.py
+websocket_request_simple_example.py
+test_*.py
+test_*.html
+tests/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Outputs
+outputs/
+*.pdf
+*.docx
+
+# Markdown files
+*.md
+md/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Alternate implementation (reference code, not part of main codebase)
+Alternate_implementation/

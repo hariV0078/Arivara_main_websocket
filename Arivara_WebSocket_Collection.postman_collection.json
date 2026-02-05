@@ -1,0 +1,580 @@
+{
+  "info": {
+    "name": "Arivara Researcher WebSocket",
+    "description": "Complete WebSocket API collection for Arivara Researcher",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Create User",
+      "event": [
+        {
+          "listen": "message",
+          "script": {
+            "exec": [
+              "// Handle create_user_response",
+              "const data = JSON.parse(event.data);",
+              "if (data.type === 'create_user_response' && data.success) {",
+              "    console.log('User created:', data.user);",
+              "    console.log('Access token:', data.access_token);",
+              "    // Store token for later use",
+              "    pm.environment.set('access_token', data.access_token);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "WS",
+        "header": [],
+        "url": {
+          "raw": "ws://localhost:8000/ws",
+          "protocol": "ws",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["ws"]
+        },
+        "description": "Create a new user account via WebSocket"
+      },
+      "response": [
+        {
+          "name": "Create User Request",
+          "originalRequest": {
+            "method": "WS",
+            "header": [],
+            "url": {
+              "raw": "ws://localhost:8000/ws",
+              "protocol": "ws",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["ws"]
+            },
+            "description": "Send this JSON message after connecting:"
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": "{\n  \"type\": \"create_user\",\n  \"email\": \"test@example.com\",\n  \"password\": \"test123456\",\n  \"full_name\": \"Test User\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "2. Authenticate",
+      "request": {
+        "method": "WS",
+        "header": [],
+        "url": {
+          "raw": "ws://localhost:8000/ws",
+          "protocol": "ws",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["ws"]
+        },
+        "description": "Authenticate with JWT token"
+      },
+      "response": [
+        {
+          "name": "Authenticate Request",
+          "originalRequest": {
+            "method": "WS",
+            "header": [],
+            "url": {
+              "raw": "ws://localhost:8000/ws",
+              "protocol": "ws",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["ws"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": "{\n  \"type\": \"authenticate\",\n  \"token\": \"{{access_token}}\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "3. Resend Email Verification",
+      "request": {
+        "method": "WS",
+        "header": [],
+        "url": {
+          "raw": "ws://localhost:8000/ws",
+          "protocol": "ws",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["ws"]
+        },
+        "description": "Resend email verification email (no auth required)"
+      },
+      "response": [
+        {
+          "name": "Resend Email Verification Request",
+          "originalRequest": {
+            "method": "WS",
+            "header": [],
+            "url": {
+              "raw": "ws://localhost:8000/ws",
+              "protocol": "ws",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["ws"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": "{\n  \"type\": \"resend_email_verification\",\n  \"email\": \"test@example.com\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "4. Request Password Reset",
+      "request": {
+        "method": "WS",
+        "header": [],
+        "url": {
+          "raw": "ws://localhost:8000/ws",
+          "protocol": "ws",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["ws"]
+        },
+        "description": "Request password reset email (no auth required). The email will contain a reset link."
+      },
+      "response": [
+        {
+          "name": "Request Password Reset",
+          "originalRequest": {
+            "method": "WS",
+            "header": [],
+            "url": {
+              "raw": "ws://localhost:8000/ws",
+              "protocol": "ws",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["ws"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": "{\n  \"type\": \"request_password_reset\",\n  \"email\": \"test@example.com\",\n  \"redirect_to\": \"https://yourapp.com/reset-password\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "5. Reset Password",
+      "request": {
+        "method": "WS",
+        "header": [],
+        "url": {
+          "raw": "ws://localhost:8000/ws",
+          "protocol": "ws",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["ws"]
+        },
+        "description": "Reset password using token from email link (no auth required)"
+      },
+      "response": [
+        {
+          "name": "Reset Password Request",
+          "originalRequest": {
+            "method": "WS",
+            "header": [],
+            "url": {
+              "raw": "ws://localhost:8000/ws",
+              "protocol": "ws",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["ws"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": "{\n  \"type\": \"reset_password\",\n  \"token\": \"token-from-email-link\",\n  \"new_password\": \"newSecurePassword123\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "6. Get User Info",
+      "request": {
+        "method": "WS",
+        "header": [],
+        "url": {
+          "raw": "ws://localhost:8000/ws",
+          "protocol": "ws",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["ws"]
+        },
+        "description": "Get current user information (requires auth)"
+      },
+      "response": [
+        {
+          "name": "Get User Info Request",
+          "originalRequest": {
+            "method": "WS",
+            "header": [],
+            "url": {
+              "raw": "ws://localhost:8000/ws",
+              "protocol": "ws",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["ws"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": "{\n  \"type\": \"get_user_info\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "7. Get Credits",
+      "request": {
+        "method": "WS",
+        "header": [],
+        "url": {
+          "raw": "ws://localhost:8000/ws",
+          "protocol": "ws",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["ws"]
+        },
+        "description": "Get current credit balance (requires auth)"
+      },
+      "response": [
+        {
+          "name": "Get Credits Request",
+          "originalRequest": {
+            "method": "WS",
+            "header": [],
+            "url": {
+              "raw": "ws://localhost:8000/ws",
+              "protocol": "ws",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["ws"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": "{\n  \"type\": \"get_credits\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "8. Get Research History",
+      "request": {
+        "method": "WS",
+        "header": [],
+        "url": {
+          "raw": "ws://localhost:8000/ws",
+          "protocol": "ws",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["ws"]
+        },
+        "description": "Get user's research history (requires auth)"
+      },
+      "response": [
+        {
+          "name": "Get History Request",
+          "originalRequest": {
+            "method": "WS",
+            "header": [],
+            "url": {
+              "raw": "ws://localhost:8000/ws",
+              "protocol": "ws",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["ws"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": "{\n  \"type\": \"get_history\",\n  \"limit\": 50\n}"
+        }
+      ]
+    },
+    {
+      "name": "9. Get Documents",
+      "request": {
+        "method": "WS",
+        "header": [],
+        "url": {
+          "raw": "ws://localhost:8000/ws",
+          "protocol": "ws",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["ws"]
+        },
+        "description": "Get documents for a research (requires auth)"
+      },
+      "response": [
+        {
+          "name": "Get Documents Request",
+          "originalRequest": {
+            "method": "WS",
+            "header": [],
+            "url": {
+              "raw": "ws://localhost:8000/ws",
+              "protocol": "ws",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["ws"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": "{\n  \"type\": \"get_documents\",\n  \"research_id\": \"uuid-here\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "10. Start Research - Basic",
+      "request": {
+        "method": "WS",
+        "header": [],
+        "url": {
+          "raw": "ws://localhost:8000/ws",
+          "protocol": "ws",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["ws"]
+        },
+        "description": "Start a basic research task (requires auth)"
+      },
+      "response": [
+        {
+          "name": "Start Research Request",
+          "originalRequest": {
+            "method": "WS",
+            "header": [],
+            "url": {
+              "raw": "ws://localhost:8000/ws",
+              "protocol": "ws",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["ws"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": "{\n  \"type\": \"start_research\",\n  \"query\": \"What is artificial intelligence?\",\n  \"report_type\": \"research_report\",\n  \"tone\": \"Formal\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "11. Start Research - Deep",
+      "request": {
+        "method": "WS",
+        "header": [],
+        "url": {
+          "raw": "ws://localhost:8000/ws",
+          "protocol": "ws",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["ws"]
+        },
+        "description": "Start a deep research task (requires auth)"
+      },
+      "response": [
+        {
+          "name": "Deep Research Request",
+          "originalRequest": {
+            "method": "WS",
+            "header": [],
+            "url": {
+              "raw": "ws://localhost:8000/ws",
+              "protocol": "ws",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["ws"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": "{\n  \"type\": \"start_research\",\n  \"query\": \"What are the latest developments in AI?\",\n  \"report_type\": \"deep\",\n  \"report_source\": \"web\",\n  \"tone\": \"Formal\",\n  \"query_domains\": [\"arxiv.org\", \"example.com\"]\n}"
+        }
+      ]
+    },
+    {
+      "name": "12. Start Research - Full Options",
+      "request": {
+        "method": "WS",
+        "header": [],
+        "url": {
+          "raw": "ws://localhost:8000/ws",
+          "protocol": "ws",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["ws"]
+        },
+        "description": "Start research with all options (requires auth)"
+      },
+      "response": [
+        {
+          "name": "Full Research Request",
+          "originalRequest": {
+            "method": "WS",
+            "header": [],
+            "url": {
+              "raw": "ws://localhost:8000/ws",
+              "protocol": "ws",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["ws"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": "{\n  \"type\": \"start_research\",\n  \"query\": \"What is machine learning?\",\n  \"report_type\": \"detailed_report\",\n  \"report_source\": \"web\",\n  \"tone\": \"Formal\",\n  \"source_urls\": [\"https://example.com\"],\n  \"document_urls\": [],\n  \"query_domains\": [\"arxiv.org\"],\n  \"headers\": {},\n  \"mcp_enabled\": false,\n  \"mcp_strategy\": \"fast\",\n  \"mcp_configs\": []\n}"
+        }
+      ]
+    },
+    {
+      "name": "13. Chat",
+      "request": {
+        "method": "WS",
+        "header": [],
+        "url": {
+          "raw": "ws://localhost:8000/ws",
+          "protocol": "ws",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["ws"]
+        },
+        "description": "Chat with AI (requires auth)"
+      },
+      "response": [
+        {
+          "name": "Chat Request",
+          "originalRequest": {
+            "method": "WS",
+            "header": [],
+            "url": {
+              "raw": "ws://localhost:8000/ws",
+              "protocol": "ws",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["ws"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": "{\n  \"type\": \"chat\",\n  \"message\": \"Tell me more about this topic\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "14. Human Feedback",
+      "request": {
+        "method": "WS",
+        "header": [],
+        "url": {
+          "raw": "ws://localhost:8000/ws",
+          "protocol": "ws",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["ws"]
+        },
+        "description": "Provide feedback (requires auth)"
+      },
+      "response": [
+        {
+          "name": "Feedback Request",
+          "originalRequest": {
+            "method": "WS",
+            "header": [],
+            "url": {
+              "raw": "ws://localhost:8000/ws",
+              "protocol": "ws",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["ws"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [],
+          "body": "{\n  \"type\": \"human_feedback\",\n  \"feedback\": \"This report needs more details on X topic\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "15. Ping (Heartbeat)",
+      "request": {
+        "method": "WS",
+        "header": [],
+        "url": {
+          "raw": "ws://localhost:8000/ws",
+          "protocol": "ws",
+          "host": ["localhost"],
+          "port": "8000",
+          "path": ["ws"]
+        },
+        "description": "Keep connection alive"
+      },
+      "response": [
+        {
+          "name": "Ping Request",
+          "originalRequest": {
+            "method": "WS",
+            "header": [],
+            "url": {
+              "raw": "ws://localhost:8000/ws",
+              "protocol": "ws",
+              "host": ["localhost"],
+              "port": "8000",
+              "path": ["ws"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "text",
+          "header": [],
+          "body": "ping"
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "ws_url",
+      "value": "ws://localhost:8000/ws",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
+

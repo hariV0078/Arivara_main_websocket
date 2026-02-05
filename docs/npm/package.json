@@ -1,0 +1,18 @@
+{
+  "name": "gpt-researcher",
+  "version": "1.0.27",
+  "description": "WebSocket client for GPT Researcher",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "gpt-researcher",
+    "websocket",
+    "ai",
+    "research"
+  ],
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

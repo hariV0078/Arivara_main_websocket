@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Arivara_Researcher</title>
+    <meta name="description" content="A research assistant powered by GPT-4">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/site/styles.css" />
+    <style>
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+        }
+
+        .agent-name {
+            text-align: center;
+        }
+
+        .agent-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .agent-choices {
+            display: none;
+        }
+
+        .btn-show {
+            display: none;
+        }
+
+        /* Icon button style for inline buttons */
+        .icon-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            margin-left: 5px;
+            border-radius: 4px;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .icon-button:hover {
+            background-color: rgba(123, 104, 238, 0.1); /* Placeholder, adjust in styles.css */
+        }
+
+        .icon-button:active {
+        }
+
+        /* Ensure buttons are properly aligned in headings */
+        h2 .icon-button, h2 .expand-button {
+            vertical-align: middle;
+            font-size: 0.8em;
+        }
+        
+        /* New navigation buttons in the top-right corner */
+        .nav-buttons {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        /* Glassmorphism Effects */
+        .glassmorphism-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 25px;
+            padding: 40px;
+            margin: 20px 0;
+            box-shadow: 
+                0 8px 32px 0 rgba(0, 0, 0, 0.4),
+                0 4px 16px 0 rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glassmorphism-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.15) 0%, 
+                rgba(255, 255, 255, 0.05) 50%, 
+                rgba(0, 0, 0, 0.05) 100%);
+            border-radius: 25px;
+            z-index: -1;
+        }
+
+        .glassmorphism-container::after {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            right: 1px;
+            bottom: 1px;
+            background: linear-gradient(45deg, 
+                rgba(255, 255, 255, 0.1) 0%, 
+                transparent 50%, 
+                rgba(0, 0, 0, 0.1) 100%);
+            border-radius: 24px;
+            z-index: -1;
+        }
+
+        .glassmorphism-container h1 {
+            color: #ffffff;
+            font-family: 'Orbitron', Arial, sans-serif !important;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.2), 0 0 20px rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+            position: relative;
+            text-transform: uppercase;
+        }
+
+        .glassmorphism-container p {
+            color: #f0f0f0;
+            font-family: 'Geist Mono', monospace;
+            text-shadow: 
+                0 1px 3px rgba(0, 0, 0, 0.3),
+                0 2px 6px rgba(0, 0, 0, 0.2);
+            line-height: 1.7;
+            position: relative;
+            text-align: justify;
+        }
+
+        .glassmorphism-container b {
+            color: #ffffff;
+            font-weight: 700;
+            text-shadow: 
+                0 1px 2px rgba(0, 0, 0, 0.4),
+                0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Landing section - clean black background */
+        
+
+        .landing .max-w-5xl {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Complete black background for entire page */
+        html, body {
+            background: #000000;
+            color: #ffffff;
+            scroll-behavior: auto;
+        }
+
+        /* Ensure all sections have black background */
+        body {
+            background: #000000 !important;
+        }
+
+
+        /* Enhanced button styling for the website */
+        .btn-primary, .btn-primary:visited {
+            background: linear-gradient(90deg, #e0e0e0 0%, #bdbdbd 50%, #757575 100%);
+            color: #222 !important;
+            border: none;
+            border-radius: 25px;
+            font-weight: 700;
+            font-family: 'Orbitron', Arial, sans-serif;
+            letter-spacing: 0.08em;
+            font-size: 1.1rem;
+            padding: 14px 36px;
+            box-shadow: 0 4px 24px 0 rgba(160,160,160,0.18), 0 2px 8px 0 rgba(120,120,120,0.12);
+            transition: background 0.4s, box-shadow 0.3s, transform 0.2s;
+            text-transform: uppercase;
+            outline: none;
+        }
+
+        .btn-primary:hover, .btn-primary:focus {
+            background: linear-gradient(90deg, #fff 0%, #bdbdbd 100%);
+            box-shadow: 0 6px 32px 0 rgba(200,200,200,0.25), 0 2px 12px 0 rgba(120,120,120,0.18);
+            color: #111 !important;
+            transform: translateY(-2px) scale(1.03);
+            text-shadow: 0 0 8px #fff, 0 0 2px #bdbdbd;
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 
+                0 2px 10px rgba(102, 126, 234, 0.4),
+                0 1px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        /* Special styling for the main CTA button */
+        .glassmorphism-container .btn-primary {
+            background: linear-gradient(90deg, #e0e0e0 0%, #bdbdbd 50%, #757575 100%);
+            font-size: 18px;
+            padding: 15px 40px;
+            box-shadow: 
+                0 6px 20px rgba(160, 160, 160, 0.5),
+                0 3px 12px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            color: #222 !important;
+        }
+
+        .glassmorphism-container .btn-primary:hover {
+            background: linear-gradient(90deg, #fff 0%, #bdbdbd 100%);
+            box-shadow: 
+                0 8px 25px rgba(200, 200, 200, 0.7),
+                0 5px 15px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            color: #111 !important;
+        }
+
+        /* Continuous typewriter animation for tagline */
+        @keyframes typewriter {
+            0%, 5% {
+                width: 0;
+            }
+            20%, 30% {
+                width: 100%;
+            }
+            35%, 40% {
+                width: 0;
+            }
+            55%, 65% {
+                width: 100%;
+            }
+            70%, 75% {
+                width: 0;
+            }
+            90%, 100% {
+                width: 100%;
+            }
+        }
+
+        @keyframes blink {
+            0%, 50% {
+                border-color: transparent;
+            }
+            51%, 100% {
+                border-color: #a7a8a4;
+            }
+        }
+
+        .typewriter-container {
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 3px solid #667eea;
+            animation: blink 1s infinite;
+            min-height: 30px;
+            background-image: linear-gradient(90deg, #e0e0e0 0%, #bdbdbd 50%, #757575 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: 'Geist Mono', monospace;
+            font-weight: 700;
+            font-size: 24px;
+            font-style: italic;
+            text-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .typewriter-text {
+            display: inline-block;
+            background-image:  linear-gradient(90deg, #e0e0e0 0%, #bdbdbd 50%, #757575 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            font-size: 24px;
+            font-style: italic;
+            text-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .evolve-title {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .evolve-main {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 72px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #ffffff;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 2px #fff;
+            display: inline-block;
+            position: relative;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .evolve-o {
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 10px;
+        }
+
+        .evolve-o svg {
+            width: 48px;
+            height: 48px;
+        }
+
+        .evolve-o circle {
+            fill: none;
+            stroke: white;
+            stroke-width: 3;
+        }
+
+        .evolve-sub {
+            font-family: 'Geist Mono', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 255, 255, 0.2);
+            letter-spacing: 0.25em;
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 50%, #667eea 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background: transparent;
+            display: block;
+            position: static;
+            padding-left: 0;
+            margin-top: 0.5em;
+        }
+
+        .landing-paragraph {
+            color: #f0f0f0;
+            font-family: 'Geist Mono', monospace;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 2px 6px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0,0,0,0.5), 0 0 2px #fff;
+            line-height: 1.7;
+            position: relative;
+            text-align: justify;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 12px;
+            margin-top: 24px;
+            margin-bottom: 24px;
+            font-size: 20px;
+        }
+
+        input, textarea {
+          caret-color: #8F00FF;
+        }
+        input:focus, textarea:focus {
+          caret-color: #00E0FF;
+        }
+
+        /* Animated Background Bubbles */
+        .bubbles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, 
+                rgba(255, 255, 255, 0.8) 0%, 
+                rgba(255, 255, 255, 0.4) 50%, 
+                rgba(255, 255, 255, 0.1) 100%);
+            animation: float 15s infinite ease-in-out;
+            box-shadow: 
+                0 0 20px rgba(255, 255, 255, 0.3),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(2px);
+        }
+
+        .bubble::before {
+            content: '';
+            position: absolute;
+            top: 15%;
+            left: 20%;
+            width: 20%;
+            height: 20%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .bubble::after {
+            content: '';
+            position: absolute;
+            top: 25%;
+            left: 60%;
+            width: 15%;
+            height: 15%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        /* Colorful bubble variants */
+        .bubble.cyan {
+            background: radial-gradient(circle at 30% 30%, 
+                rgba(0, 224, 255, 0.8) 0%, 
+                rgba(0, 224, 255, 0.4) 50%, 
+                rgba(0, 224, 255, 0.1) 100%);
+            box-shadow: 
+                0 0 25px rgba(0, 224, 255, 0.4),
+                inset 0 0 20px rgba(0, 224, 255, 0.2);
+        }
+
+        .bubble.purple {
+            background: radial-gradient(circle at 30% 30%, 
+                rgba(143, 0, 255, 0.8) 0%, 
+                rgba(143, 0, 255, 0.4) 50%, 
+                rgba(143, 0, 255, 0.1) 100%);
+            box-shadow: 
+                0 0 25px rgba(143, 0, 255, 0.4),
+                inset 0 0 20px rgba(143, 0, 255, 0.2);
+        }
+
+        .bubble.green {
+            background: radial-gradient(circle at 30% 30%, 
+                rgba(67, 233, 123, 0.8) 0%, 
+                rgba(67, 233, 123, 0.4) 50%, 
+                rgba(67, 233, 123, 0.1) 100%);
+            box-shadow: 
+                0 0 25px rgba(67, 233, 123, 0.4),
+                inset 0 0 20px rgba(67, 233, 123, 0.2);
+        }
+
+        .bubble.pink {
+            background: radial-gradient(circle at 30% 30%, 
+                rgba(255, 105, 180, 0.8) 0%, 
+                rgba(255, 105, 180, 0.4) 50%, 
+                rgba(255, 105, 180, 0.1) 100%);
+            box-shadow: 
+                0 0 25px rgba(255, 105, 180, 0.4),
+                inset 0 0 20px rgba(255, 105, 180, 0.2);
+        }
+
+        .bubble.orange {
+            background: radial-gradient(circle at 30% 30%, 
+                rgba(255, 165, 0, 0.8) 0%, 
+                rgba(255, 165, 0, 0.4) 50%, 
+                rgba(255, 165, 0, 0.1) 100%);
+            box-shadow: 
+                0 0 25px rgba(255, 165, 0, 0.4),
+                inset 0 0 20px rgba(255, 165, 0, 0.2);
+        }
+
+        .bubble.blue {
+            background: radial-gradient(circle at 30% 30%, 
+                rgba(102, 126, 234, 0.8) 0%, 
+                rgba(102, 126, 234, 0.4) 50%, 
+                rgba(102, 126, 234, 0.1) 100%);
+            box-shadow: 
+                0 0 25px rgba(102, 126, 234, 0.4),
+                inset 0 0 20px rgba(102, 126, 234, 0.2);
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(100vh) translateX(0) scale(0.8);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* Different animation delays for variety */
+        .bubble:nth-child(1) { animation-delay: 0s; }
+        .bubble:nth-child(2) { animation-delay: 2s; }
+        .bubble:nth-child(3) { animation-delay: 4s; }
+        .bubble:nth-child(4) { animation-delay: 6s; }
+        .bubble:nth-child(5) { animation-delay: 8s; }
+        .bubble:nth-child(6) { animation-delay: 10s; }
+        .bubble:nth-child(7) { animation-delay: 12s; }
+        .bubble:nth-child(8) { animation-delay: 14s; }
+        .bubble:nth-child(9) { animation-delay: 16s; }
+        .bubble:nth-child(10) { animation-delay: 18s; }
+        .bubble:nth-child(11) { animation-delay: 20s; }
+        .bubble:nth-child(12) { animation-delay: 22s; }
+        .bubble:nth-child(13) { animation-delay: 24s; }
+        .bubble:nth-child(14) { animation-delay: 26s; }
+        .bubble:nth-child(15) { animation-delay: 28s; }
+
+        /* Different sizes for variety */
+        .bubble:nth-child(3n) { width: 60px; height: 60px; }
+        .bubble:nth-child(3n+1) { width: 80px; height: 80px; }
+        .bubble:nth-child(3n+2) { width: 100px; height: 100px; }
+
+        /* Different horizontal positions */
+        .bubble:nth-child(5n) { left: 10%; }
+        .bubble:nth-child(5n+1) { left: 20%; }
+        .bubble:nth-child(5n+2) { left: 30%; }
+        .bubble:nth-child(5n+3) { left: 40%; }
+        .bubble:nth-child(5n+4) { left: 50%; }
+        .bubble:nth-child(5n+5) { left: 60%; }
+        .bubble:nth-child(5n+6) { left: 70%; }
+        .bubble:nth-child(5n+7) { left: 80%; }
+        .bubble:nth-child(5n+8) { left: 90%; }
+
+    </style>
+</head>
+
+<body>
+    <!-- Animated Background Bubbles -->
+    <div class="bubbles-container" id="bubblesContainer">
+        <!-- Bubbles will be generated dynamically -->
+    </div>
+
+    <!-- Navigation Buttons (moved from top bar) -->
+    <div class="nav-buttons">
+        <div id="websocketPanelOpenBtn" class="top-websocket-button">
+            <i class="fas fa-network-wired"></i> Status
+        </div>
+        <div id="historyPanelOpenBtn" class="top-history-button">
+            <i class="fas fa-history"></i> History
+        </div>
+    </div>
+
+    <!-- WebSocket Status Panel -->
+    <div class="websocket-panel" id="websocketPanel">
+        <div class="websocket-panel-header">
+            <h3><i class="fas fa-plug"></i> Connection Status</h3>
+            <div class="websocket-panel-actions">
+                <button id="websocketPanelToggle" class="websocket-action-btn" title="Close panel">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+        </div>
+        <div class="websocket-status">
+            <div class="status-item">
+                <span class="status-label">Connection:</span>
+                <span class="status-value" id="connectionStatus">Disconnected</span>
+                <span class="status-indicator" id="connectionIndicator"></span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Research:</span>
+                <span class="status-value" id="researchStatus">Inactive</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Connected for:</span>
+                <span class="status-value" id="connectionDuration">-</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Last activity:</span>
+                <span class="status-value" id="lastActivity">-</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">ReadyState:</span>
+                <span class="status-value" id="readyState">-</span>
+            </div>
+            <div class="status-divider"></div>
+            <div class="status-item">
+                <span class="status-label">Connection attempts:</span>
+                <span class="status-value" id="connectionAttempts">0</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Messages received:</span>
+                <span class="status-value" id="messagesReceived">0</span>
+            </div>
+            <div class="status-divider"></div>
+            <div class="status-item">
+                <span class="status-label">Current task:</span>
+                <span class="status-value" id="currentTask">-</span>
+            </div>
+        </div>
+    </div>
+
+    <section class="landing">
+        <div class="max-w-5xl mx-auto text-center">
+            <div class="glassmorphism-container">
+                <div class="evolve-title">
+                  <span class="evolve-main">
+                    A R I V A R A
+                  </span>
+                  <span class="evolve-sub">RESEARCHER</span>
+                </div>
+                <p class="landing-paragraph">
+                    Tired of jumping between tabs and reading confusing articles?
+                
+                    Just type your question, and Arivara gives you clear, expert-level answers, detailed reports, and trusted sources all in seconds.
+                    
+                    From quick questions to deep research, Arivara keeps it fast, focused, and easy.
+                </p>
+                
+                <div style="text-align: center; margin: 20px 0;">
+                    <div class="typewriter-container">
+                    </div>
+                </div>
+                <a href="#form" class="btn btn-primary start-research-btn" style="margin-top: 20px;">Start Research</a>
+            </div>
+        </div>
+    </section>
+
+    <main class="container" id="form">
+        
+        <form method="POST" class="mt-3" id="researchForm">
+            <div class="form-group">
+                <label for="task" class="agent-question">What would you like me to research next?</label>
+                <textarea id="task" name="task" class="form-control highlight-connection" placeholder="Enter any topic, question, or idea..." required autocomplete="on"></textarea>
+                <input type="radio" name="agent" id="autoAgent" value="Auto Agent" checked hidden>
+            </div>
+            <div class="form-group">
+                <div class="row">
+
+
+                </div>
+                <button type="button" id="btnShowAuto" class="btn btn-secondary mt-3 btn-show">Auto Agent</button>
+            </div>
+            <div class="form-group">
+                <label for="report_type" class="agent-question">What type of report would you like me to
+                    generate?</label>
+                <select name="report_type" id="report_type" class="form-control highlight-connection" required>
+                    <option value="research_report">Summary - Short and fast (~2 min)</option>
+                    <option value="detailed_report">Detailed - In depth and longer (~5 min)</option>
+                    <option value="resource_report">Resource Report</option>
+                    <option value="deep">Deep Research</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="tone" class="agent-question">In which tone would you like the report to be
+                    generated?</label>
+                <select name="tone" id="tone" class="form-control highlight-connection" required>
+                    <option value="Objective">Objective - Impartial and unbiased presentation of facts and findings
+                    </option>
+                    <option value="Formal">Formal - Adheres to academic standards with sophisticated language and
+                        structure</option>
+                    <option value="Analytical">Analytical - Critical evaluation and detailed examination of data and
+                        theories</option>
+                    <option value="Persuasive">Persuasive - Convincing the audience of a particular viewpoint or
+                        argument</option>
+                    <option value="Informative">Informative - Providing clear and comprehensive information on a topic
+                    </option>
+                    <option value="Explanatory">Explanatory - Clarifying complex concepts and processes</option>
+                    <option value="Descriptive">Descriptive - Detailed depiction of phenomena, experiments, or case
+                        studies</option>
+                    <option value="Critical">Critical - Judging the validity and relevance of the research and its
+                        conclusions</option>
+                    <option value="Comparative">Comparative - Juxtaposing different theories, data, or methods to
+                        highlight differences and similarities</option>
+                    <option value="Speculative">Speculative - Exploring hypotheses and potential implications or future
+                        research directions</option>
+                    <option value="Reflective">Reflective - Considering the research process and personal insights or
+                        experiences</option>
+                    <option value="Narrative">Narrative - Telling a story to illustrate research findings or
+                        methodologies</option>
+                    <option value="Humorous">Humorous - Light-hearted and engaging, usually to make the content more
+                        relatable</option>
+                    <option value="Optimistic">Optimistic - Highlighting positive findings and potential benefits
+                    </option>
+                    <option value="Pessimistic">Pessimistic - Focusing on limitations, challenges, or negative outcomes
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="report_source" class="agent-question">What sources would you like me to research
+                    from?</label>
+                <p class="text-left mt-0 pt-0" style="font-size: 0.7rem;">You can now do research on local documents as
+                    well. Please make sure to add the DOC_PATH env variable pointing to your documents folder.</p>
+                <select name="report_source" id="report_source" class="form-control highlight-connection" required>
+                    <option value="web">The Web</option>
+                    <option value="local">My Documents</option>
+                    <option value="hybrid">Hybrid</option>
+                    <option value="azure">Azure storage</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="queryDomains" class="form-label">Query Domains (Optional)</label>
+                <input type="text" class="form-control highlight-connection" id="queryDomains" name="query_domains" placeholder="Enter domains separated by commas" autocomplete="on">
+                <small class="text-muted">Example: techcrunch.com, forbes.com</small>
+            </div>
+
+            <!-- MCP Configuration Section -->
+            <div class="form-group">
+                <div class="mcp-section">
+                    <div class="mcp-header">
+                        <label for="mcpEnabled" class="form-label">
+                            <input type="checkbox" id="mcpEnabled" name="mcp_enabled" class="mcp-toggle">
+                            Enable MCP (Model Context Protocol)
+                        </label>
+                        <button type="button" id="mcpInfoBtn" class="mcp-info-btn" title="Learn about MCP">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                    </div>
+                    <small class="text-muted">Connect to external tools and data sources through MCP servers</small>
+                    
+                    <div id="mcpConfigSection" class="mcp-config-section" style="display: none;">
+                        <div class="mcp-presets">
+                            <label class="form-label">Quick Presets</label>
+                            <div class="preset-buttons">
+                                <button type="button" class="btn btn-outline-secondary btn-sm preset-btn" data-preset="github">
+                                    <i class="fab fa-github"></i> GitHub
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm preset-btn" data-preset="tavily">
+                                    <i class="fas fa-search"></i> Tavily Web Search
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm preset-btn" data-preset="filesystem">
+                                    <i class="fas fa-folder"></i> Local Files
+                                </button>
+                            </div>
+                            <small class="text-muted">Click a preset to add pre-configured MCP servers to the JSON below</small>
+                        </div>
+
+                        <div class="mcp-config-group">
+                            <label for="mcpConfig" class="form-label">MCP Servers Configuration</label>
+                            <textarea id="mcpConfig" name="mcp_config" class="form-control mcp-config-textarea" rows="8" placeholder="Paste your MCP servers configuration as JSON array...">[]</textarea>
+                            <div class="mcp-config-status">
+                                <span id="mcpConfigStatus" class="mcp-status-text">Valid JSON ✓</span>
+                                <button type="button" id="mcpFormatBtn" class="btn btn-sm btn-secondary">
+                                    <i class="fas fa-code"></i> Format JSON
+                                </button>
+                            </div>
+                            <small class="text-muted">
+                                Paste your MCP servers configuration as a JSON array. Each server should have properties like 
+                                <code>name</code>, <code>command</code>, <code>args</code>, and optional <code>env</code> variables.
+                                <a href="#" id="mcpExampleLink">See example →</a>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <input type="submit" value="Begin Research" class="btn btn-primary button-padding" id="submitButton">
+        </form>
+
+        <!-- Add JSON button above Research Progress section -->
+        <div class="margin-div" id="jsonButtonContainer" style="display: none; text-align: right; margin-bottom: 10px;">
+            <a id="downloadLinkJsonTop" href="#" class="report-action-btn disabled" target="_blank" rel="noopener noreferrer">
+                <i class="fas fa-file-code"></i> JSON
+            </a>
+        </div>
+
+        <div class="margin-div research-output-container">
+            <!-- Move spinner to the left side of the text -->
+            <h2><div id="modernSpinner" class="modern-spinner"></div> Research Progress <button id="expandOutputBtn" class="expand-button" title="Expand"><i class="fas fa-expand-alt"></i></button></h2>
+            <p class="mt-2 text-left" style="font-size: 0.8rem;">
+                Watch as the AI works to gather information and analyze your topic in real-time.</p>
+            <div id="output"></div>
+        </div>
+        <div class="images_div">
+            <div id="selectedImagesContainer" style="display: none;"></div>
+        </div>
+        <div class="margin-div report-container">
+            <h2>Research Report
+                <button id="copyToClipboardTop" class="icon-button" title="Copy" style="display: none;">
+                    <i class="fas fa-copy"></i>
+                </button>
+                <button id="expandReportBtn" class="expand-button" title="Expand">
+                    <i class="fas fa-expand-alt"></i>
+                </button>
+            </h2>
+            <!-- Add download buttons above the report container -->
+            <div class="report-actions" style="display: none;">
+                <a id="downloadLinkTop" href="#" class="report-action-btn disabled" target="_blank" rel="noopener noreferrer">
+                    <i class="fas fa-file-pdf"></i> PDF
+                </a>
+                <a id="downloadLinkWordTop" href="#" class="report-action-btn disabled" target="_blank" rel="noopener noreferrer">
+                    <i class="fas fa-file-word"></i> Word
+                </a>
+                <a id="downloadLinkMdTop" href="#" class="report-action-btn disabled" target="_blank" rel="noopener noreferrer">
+                    <i class="fas fa-file-lines"></i> Markdown
+                </a>
+            </div>
+            <div id="reportContainer"></div>
+            <div id="reportActions" style="display: none;">
+                <div class="alert alert-info" role="alert" id="status"></div>
+            </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="margin-div chat-container" id="chatContainer" style="display: none;">
+            <h2><i class="fas fa-comments"></i> Chat with AI about this research <button id="expandChatBtn" class="expand-button" title="Expand"><i class="fas fa-expand-alt"></i></button></h2>
+            <p class="text-muted">Ask questions about the research report to get more insights</p>
+            <div id="chatMessages" class="chat-messages"></div>
+            <div class="chat-input-container">
+                <textarea id="chatInput" class="form-control chat-input" placeholder="Ask a question about this research..." rows="2"></textarea>
+                <button id="voiceInputBtn" class="btn btn-secondary" title="Use voice input">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button id="sendChatBtn" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> Send
+                </button>
+            </div>
+        </div>
+
+        <!-- Fixed bottom bar styled like the top credits bar -->
+    </main>
+
+    <!-- Conversation History Panel -->
+    <div class="history-panel" id="historyPanel">
+        <div class="history-panel-header">
+            <h3><i class="fas fa-history"></i> Research History</h3>
+            <div class="history-panel-actions">
+                <button id="historyPanelToggle" class="history-action-btn" title="Close panel">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div class="history-panel-search">
+            <input type="text" id="historySearch" placeholder="Search research history...">
+            <button id="historySearchBtn" class="history-action-btn" title="Search">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+        <div class="history-panel-filters">
+            <select id="historySortOrder">
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+            </select>
+            <!-- JS will add Import/Export/Debug buttons here -->
+            <button id="historyClearBtn" class="history-action-btn" title="Clear all history">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+        </div>
+        <div class="history-panel-entries" id="historyEntries">
+            <!-- Entries will be populated dynamically -->
+        </div>
+    </div>
+    
+    <!-- Sticky Downloads Bar -->
+    <div class="sticky-downloads-bar" id="stickyDownloadsBar" style="display: none;"> <!-- Initially hidden -->
+        <div class="download-buttons-container">
+            <a id="copyToClipboard" class="download-option-btn disabled">
+                <i class="fas fa-copy"></i> Copy (Markdown)
+            </a>
+            <a id="downloadLinkMd" href="#" class="download-option-btn disabled" target="_blank" rel="noopener noreferrer">
+                <i class="fas fa-file-lines"></i> Markdown
+            </a>
+            <a id="downloadLink" href="#" class="download-option-btn disabled" target="_blank" rel="noopener noreferrer">
+                <i class="fas fa-file-pdf"></i> PDF
+            </a>
+            <a id="downloadLinkWord" href="#" class="download-option-btn disabled" target="_blank" rel="noopener noreferrer">
+                <i class="fas fa-file-word"></i> Word
+            </a>
+            <a id="downloadLinkJson" href="#" class="download-option-btn disabled" target="_blank" rel="noopener noreferrer">
+                <i class="fas fa-file-code"></i> Log (JSON)
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <p>Arivara_Researcher & copy ; 2025</p>
+    </footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js"></script>
+    <script src="/site/scripts.js"></script>
+    <script>
+        // Auto-resize textarea as content grows
+        const taskTextarea = document.getElementById('task');
+        if (taskTextarea) {
+            // Set initial height
+            taskTextarea.setAttribute('style', 'height: 38px; overflow-y: hidden;');
+
+            // Function to resize textarea based on content
+            const resizeTextarea = () => {
+                taskTextarea.style.height = 'auto';
+                taskTextarea.style.height = taskTextarea.scrollHeight + 'px';
+            };
+
+            // Add event listeners for input and focus
+            taskTextarea.addEventListener('input', resizeTextarea);
+            taskTextarea.addEventListener('focus', resizeTextarea);
+        }
+
+        // Ensure feature panels are positioned correctly on window resize
+        window.addEventListener('resize', function () {
+            // Adjust the feature panel width based on screen size
+            const viewportWidth = window.innerWidth;
+            const featurePanel = document.querySelector('.feature-panel');
+
+            if (featurePanel) {
+                if (viewportWidth < 1400) {
+                    featurePanel.style.display = 'none';
+                } else {
+                    featurePanel.style.display = 'block';
+                    // Adjust width based on screen size
+                    const panelWidth = Math.min(280, Math.max(200, viewportWidth * 0.15));
+                    featurePanel.style.width = `${panelWidth}px`;
+                }
+            }
+        });
+
+        // Continuous typewriter effect
+        const texts = ['Smarter research.', 'Less work.', 'More confidence.'];
+        let textIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        let typeSpeed = 100;
+
+        function typeWriter() {
+            const currentText = texts[textIndex];
+            const typewriterContainer = document.querySelector('.typewriter-container');
+            
+            if (isDeleting) {
+                // Deleting effect
+                typewriterContainer.textContent = currentText.substring(0, charIndex - 1);
+                charIndex--;
+                typeSpeed = 50;
+            } else {
+                // Typing effect
+                typewriterContainer.textContent = currentText.substring(0, charIndex + 1);
+                charIndex++;
+                typeSpeed = 100;
+            }
+
+            if (!isDeleting && charIndex === currentText.length) {
+                // Pause at end of typing
+                typeSpeed = 2000;
+                isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                // Move to next text
+                isDeleting = false;
+                textIndex = (textIndex + 1) % texts.length;
+                typeSpeed = 500;
+            }
+
+            setTimeout(typeWriter, typeSpeed);
+        }
+
+        // Start the typewriter effect when page loads
+        window.addEventListener('load', function() {
+            setTimeout(typeWriter, 1000);
+            createBubbles();
+        });
+
+        // Create animated background bubbles
+        function createBubbles() {
+            const bubblesContainer = document.getElementById('bubblesContainer');
+            const colors = ['cyan', 'purple', 'green', 'pink', 'orange', 'blue'];
+            const numBubbles = 15;
+
+            for (let i = 0; i < numBubbles; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = `bubble ${colors[i % colors.length]}`;
+                
+                // Random starting position
+                bubble.style.left = Math.random() * 100 + '%';
+                bubble.style.animationDelay = (i * 2) + 's';
+                
+                bubblesContainer.appendChild(bubble);
+            }
+        }
+
+        // Futuristic smooth scroll with bounce for Start Researching button
+  document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.querySelector('.start-research-btn');
+    const formSection = document.getElementById('form');
+    if (btn && formSection) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        // Futuristic scroll with bounce
+        const startY = window.scrollY;
+        const endY = formSection.getBoundingClientRect().top + window.scrollY - 30;
+        let startTime = null;
+        function animateScroll(currentTime) {
+          if (!startTime) startTime = currentTime;
+          const elapsed = currentTime - startTime;
+          // EaseOutBack for a futuristic bounce
+          const duration = 1200;
+          const c = endY - startY;
+          const t = Math.min(elapsed / duration, 1);
+          const s = 1.70158;
+          const easeOutBack = (t) => 1 + (--t) * t * ((s + 1) * t + s);
+          window.scrollTo(0, startY + c * easeOutBack(t));
+          if (t < 1) {
+            requestAnimationFrame(animateScroll);
+          }
+        }
+        requestAnimationFrame(animateScroll);
+      });
+    }
+  });
+    </script>
+</body>
+
+</html>
