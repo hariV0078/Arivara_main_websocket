@@ -34,7 +34,7 @@ class OpenAIService:
         self.openai_vision_model = "gpt-4-vision-preview"
 
         # Gemini setup
-        self.gemini_model_name = "gemini-1.5-pro"
+        self.gemini_model_name = "gemini-2.5-pro"
         self.gemini_model = None
         if settings.gemini_api_key:
             genai.configure(api_key=settings.gemini_api_key)
