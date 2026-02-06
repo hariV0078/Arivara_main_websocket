@@ -1,5 +1,6 @@
 from typing import List, Optional, Dict, Any
 import asyncio
+import httpx
 from app.config import settings
 
 # OpenAI
@@ -7,6 +8,11 @@ from openai import OpenAI
 
 # Gemini
 import google.generativeai as genai
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
+
+# PIL for image fetching
+from PIL import Image
+import io
 
 
 class OpenAIService:
@@ -33,6 +39,15 @@ class OpenAIService:
         if settings.gemini_api_key:
             genai.configure(api_key=settings.gemini_api_key)
             self.gemini_model = genai.GenerativeModel(self.gemini_model_name)
+
+        # Async HTTP client for fetching images
+        self.http_client = httpx.AsyncClient(timeout=20.0, follow_redirects=True)
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.http_client.aclose()
 
     async def generate_response(
         self,
@@ -132,62 +147,94 @@ class OpenAIService:
         pdf_context: Optional[str] = None,
     ) -> str:
         """
-        Gemini implementation.
-
-        - Flattens conversation into a single prompt with roles.
-        - Appends web_context and pdf_context as additional sections.
-        - Image URLs are included as text references (Gemini can sometimes fetch from URLs).
+        Gemini implementation with proper multimodal support.
+        - Constructs a 'contents' list for the API.
+        - Fetches images from URLs and includes them as PIL Image objects.
+        - Includes PDF and web context as distinct text parts.
         """
-        # Build a textual transcript of the conversation
-        convo_lines: List[str] = []
-        for msg in messages:
-            role = msg.get("role", "user")
-            content = msg.get("content", "")
-            image_urls = msg.get("image_urls") or []
-            line = f"{role.upper()}: {content}"
-            if image_urls:
-                line += "\nIMAGE URLS:\n" + "\n".join(image_urls)
-            convo_lines.append(line)
-
-        prompt_parts: List[str] = []
+        history = []
+        
+        # Add system-level context first
+        system_parts = []
+        if pdf_context:
+            system_parts.append("Use the following extracted text from one or more PDFs to answer the user's query:\n\n---\n")
+            system_parts.append(pdf_context)
+            system_parts.append("\n---\n")
 
         if web_context:
-            prompt_parts.append(
-                "WEB CONTEXT (from web search):\n"
-                f"{web_context}\n"
-                "----\n"
-            )
+            system_parts.append("Use the following context from a web search to answer the user's query:\n\n---\n")
+            system_parts.append(web_context)
+            system_parts.append("\n---\n")
+        
+        if system_parts:
+            # Prepend system context as the first 'model' turn to guide the conversation
+            history.append({'role': 'model', 'parts': ["Ok, I will use the provided context to answer."]})
+            history.insert(0, {'role': 'user', 'parts': system_parts})
 
-        if pdf_context:
-            prompt_parts.append(
-                "PDF CONTEXT (extracted text from uploaded PDFs):\n"
-                f"{pdf_context}\n"
-                "----\n"
-            )
 
-        prompt_parts.append("CONVERSATION:\n" + "\n\n".join(convo_lines))
-        prompt_parts.append(
-            "You are a helpful assistant. Use the WEB CONTEXT and PDF CONTEXT when relevant, "
-            "but prioritize the latest and most reliable information. Answer the user's last message."
-        )
+        # Process conversation history
+        for msg in messages:
+            role = "model" if msg.get("role") == "assistant" else "user"
+            
+            parts: List[Any] = []
+            
+            # Add text content
+            if msg.get("content"):
+                parts.append(msg["content"])
 
-        full_prompt = "\n\n".join(prompt_parts)
+            # Fetch and add images
+            if msg.get("image_urls"):
+                image_urls = msg.get("image_urls", [])
+                
+                # Asynchronously fetch images
+                async def fetch_image(url):
+                    try:
+                        response = await self.http_client.get(url)
+                        response.raise_for_status()
+                        image = Image.open(io.BytesIO(response.content))
+                        return image
+                    except Exception as e:
+                        print(f"Failed to fetch or process image from {url}: {e}")
+                        return None # Return None on failure
+                
+                tasks = [fetch_image(url) for url in image_urls]
+                fetched_images = await asyncio.gather(*tasks)
+
+                # Add successfully fetched images to the parts list
+                for img in fetched_images:
+                    if img:
+                        parts.append(img)
+            
+            if parts:
+                history.append({"role": role, "parts": parts})
+        
+        if not history:
+             raise Exception("Cannot generate response from empty history.")
+
+        # The last message is the one we want to generate a response for, so we pop it from history.
+        latest_request_parts = history.pop(-1)['parts']
 
         try:
-            loop = asyncio.get_event_loop()
-            response = await loop.run_in_executor(
-                None,
-                lambda: self.gemini_model.generate_content(
-                    full_prompt,
-                    generation_config={
-                        "temperature": 0.7,
-                        "max_output_tokens": 2000,
-                    },
-                ),
+            chat_session = self.gemini_model.start_chat(history=history)
+            
+            response = await chat_session.send_message_async(
+                latest_request_parts,
+                generation_config={
+                    "temperature": 0.7,
+                    "max_output_tokens": 4096,
+                },
+                 safety_settings={
+                    HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+                    HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+                    HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+                    HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+                },
             )
-            # google-generativeai returns .text for plain responses
             return response.text
         except Exception as e:
+            # It's helpful to know what was sent during an error
+            print(f"Error sending to Gemini. History: {history}")
+            print(f"Error sending to Gemini. Latest request: {latest_request_parts}")
             raise Exception(f"Gemini API error: {str(e)}")
 
     async def generate_heading(
