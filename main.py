@@ -68,5 +68,13 @@ if __name__ == "__main__":
     host = os.getenv("SERVER_HOST", os.getenv("HOST", "0.0.0.0"))
     port = int(os.getenv("SERVER_PORT", os.getenv("PORT", 8000)))
     
-    logger.info(f"Starting server on {host}:{port} with 4 workers...")
-    uvicorn.run("backend.server.server:app", host=host, port=port, log_level="info", workers=4)
+    logger.info(f"Starting server on {host}:{port} with 1 worker...")
+    uvicorn.run(
+        "backend.server.server:app",
+        host=host,
+        port=port,
+        log_level="info",
+        workers=1,
+        proxy_headers=True,
+        forwarded_allow_ips="*"
+    )
